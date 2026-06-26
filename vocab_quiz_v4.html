@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>전문용어 퀴즈</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;--bg2:#faf9ff;--bg3:#f3f0ff;
+  --text:#1e1b4b;--text2:#6b68a0;--text3:#a09ec0;
+  --border:rgba(109,99,200,0.15);--border2:rgba(109,99,200,0.35);
+  --acc:#6d63c8;--acc-l:#ede9ff;--acc-m:#c4bdf7;
+  --ok-bg:#ecfdf5;--ok-t:#065f46;--ok-b:#6ee7b7;
+  --no-bg:#fff1f2;--no-t:#9f1239;--no-b:#fda4af;
+  --r:12px;--rl:18px;--rxl:24px;
+}
+body{font-family:'Inter',-apple-system,sans-serif;background:linear-gradient(135deg,#f0edff 0%,#fce7f3 50%,#e0f2fe 100%);min-height:100vh;padding:2.5rem 1rem;color:var(--text)}
+.container{max-width:660px;margin:0 auto}
+
+/* hero illust */
+.hero{display:flex;justify-content:center;margin-bottom:1.5rem}
+
+/* header */
+.header{text-align:center;margin-bottom:2rem}
+.badge{display:inline-block;background:var(--acc);color:#fff;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 14px;border-radius:999px;margin-bottom:12px}
+.header h1{font-size:26px;font-weight:700;letter-spacing:-.03em;margin-bottom:6px}
+.header p{font-size:14px;color:var(--text2);line-height:1.6}
+
+/* card */
+.card{background:var(--bg);border:1px solid var(--border);border-radius:var(--rxl);padding:1.75rem;margin-bottom:1rem;box-shadow:0 2px 16px rgba(109,99,200,.07)}
+.slabel{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--acc);margin-bottom:10px}
+
+/* inputs */
+input[type=text],input[type=password],textarea{width:100%;padding:11px 16px;font-size:14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s}
+input[type=text]:focus,input[type=password]:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(109,99,200,.12)}
+textarea{min-height:72px;resize:none}
+
+.row{display:flex;gap:8px;align-items:flex-start}
+.row input{flex:1}
+
+.hint{font-size:12px;color:var(--text3);margin-top:7px;line-height:1.5}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{padding:5px 13px;font-size:12px;font-weight:500;border:1px solid var(--border);border-radius:999px;background:var(--bg2);color:var(--text2);cursor:pointer;transition:background .12s,border-color .12s}
+.chip:hover{background:var(--acc-l);border-color:var(--acc-m);color:var(--acc)}
+
+/* btns */
+.primary-btn{width:100%;padding:14px;font-size:15px;font-weight:600;background:linear-gradient(135deg,#6d63c8,#a855f7);color:#fff;border:none;border-radius:var(--r);cursor:pointer;transition:opacity .15s,transform .1s;font-family:inherit;box-shadow:0 4px 14px rgba(109,99,200,.35)}
+.primary-btn:hover{opacity:.92;transform:translateY(-1px)}
+.primary-btn:active{transform:translateY(0)}
+.primary-btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.sec-btn{padding:10px 20px;font-size:13px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text2);cursor:pointer;font-family:inherit;font-weight:500;transition:background .1s}
+.sec-btn:hover{background:var(--acc-l);border-color:var(--acc-m);color:var(--acc)}
+.small-btn{padding:6px 13px;font-size:12px;font-weight:500;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text2);cursor:pointer;font-family:inherit;transition:background .12s}
+.small-btn:hover{background:var(--bg3)}
+.small-btn.danger{color:#9f1239;border-color:#fda4af}
+.small-btn.danger:hover{background:var(--no-bg)}
+
+.status{font-size:13px;color:var(--text2);text-align:center;margin-top:10px;min-height:20px}
+
+/* api saved */
+.api-actions{display:flex;gap:8px;margin-top:8px;align-items:center}
+.saved-badge{display:none;font-size:12px;color:var(--ok-t);font-weight:500}
+.saved-badge.on{display:block}
+
+/* quiz */
+#quiz-section,#result-section{display:none}
+.prog-wrap{background:var(--border);border-radius:999px;height:5px;margin-bottom:1.25rem;overflow:hidden}
+.prog-fill{height:5px;background:linear-gradient(90deg,#6d63c8,#a855f7);border-radius:999px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+.quiz-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem}
+.quiz-meta span{font-size:13px;color:var(--text2);font-weight:500}
+.mode-pill{font-size:11px;padding:4px 12px;border-radius:999px;background:var(--acc-l);color:var(--acc);border:1px solid var(--acc-m);font-weight:700;letter-spacing:.04em}
+
+/* flashcard */
+.flashcard{background:linear-gradient(145deg,#fff,#faf8ff);border:1px solid var(--border);border-radius:var(--rxl);padding:2.5rem 2rem;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer;transition:transform .2s,box-shadow .2s;margin-bottom:1rem;user-select:none;box-shadow:0 4px 20px rgba(109,99,200,.08)}
+.flashcard:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(109,99,200,.14)}
+.flashcard.flipped{background:linear-gradient(145deg,#f0edff,#fce7f3);cursor:default;transform:none}
+.fc-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--acc);margin-bottom:14px;background:var(--acc-l);padding:4px 12px;border-radius:999px;border:1px solid var(--acc-m)}
+.term-row{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:4px}
+.fc-term{font-size:30px;font-weight:700;color:var(--text);letter-spacing:-.03em}
+.fc-cat{font-size:12px;color:var(--text3);margin-bottom:10px}
+.fc-hint{font-size:12px;color:var(--text3);margin-top:16px}
+.fc-def{font-size:15px;color:var(--text);line-height:1.7;margin-top:10px;text-align:center;max-width:460px}
+.speak-btn{background:var(--acc-l);border:1px solid var(--acc-m);border-radius:50%;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:background .12s,transform .1s;flex-shrink:0;color:var(--acc)}
+.speak-btn:hover{background:var(--acc-m);transform:scale(1.1)}
+.fc-btns{display:flex;gap:10px;margin-bottom:1rem}
+.fc-btn{flex:1;padding:12px;font-size:14px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg);color:var(--text2);cursor:pointer;font-family:inherit;font-weight:500;transition:background .1s}
+.fc-btn:hover:not(:disabled){background:var(--bg2)}
+.fc-btn:disabled{opacity:.3;cursor:default}
+.fc-btn.knew{background:linear-gradient(135deg,#6d63c8,#a855f7);color:#fff;border-color:transparent;box-shadow:0 3px 10px rgba(109,99,200,.3)}
+.fc-btn.knew:hover:not(:disabled){opacity:.9}
+
+/* mcq */
+.mcq-prompt{background:linear-gradient(145deg,#fff,#faf8ff);border:1px solid var(--border);border-radius:var(--rxl);padding:1.75rem;margin-bottom:1rem;box-shadow:0 4px 20px rgba(109,99,200,.08)}
+.q-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--acc);display:inline-block;background:var(--acc-l);padding:4px 12px;border-radius:999px;border:1px solid var(--acc-m);margin-bottom:10px}
+.mcq-term{font-size:26px;font-weight:700;color:var(--text);letter-spacing:-.02em}
+.mcq-cat{font-size:12px;color:var(--text3);margin-top:3px}
+.mcq-opts{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem}
+.mcq-opt{padding:13px 16px;font-size:14px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);cursor:pointer;text-align:left;font-family:inherit;font-weight:500;transition:background .1s,border-color .1s,transform .1s;line-height:1.45}
+.mcq-opt:hover:not(:disabled){background:var(--acc-l);border-color:var(--acc-m);transform:translateX(3px)}
+.mcq-opt.correct{background:var(--ok-bg);border-color:var(--ok-b);color:var(--ok-t);transform:none}
+.mcq-opt.wrong{background:var(--no-bg);border-color:var(--no-b);color:var(--no-t);transform:none}
+.mcq-opt:disabled{cursor:default}
+
+/* result */
+.result-hero{text-align:center;padding:2.5rem 2rem 2rem;background:linear-gradient(145deg,#fff,#f0edff);border:1px solid var(--border);border-radius:var(--rxl);margin-bottom:1rem;box-shadow:0 4px 24px rgba(109,99,200,.1)}
+.big-score{font-size:60px;font-weight:700;letter-spacing:-.04em;background:linear-gradient(135deg,#6d63c8,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:6px}
+.result-sub{font-size:14px;color:var(--text2);margin-bottom:1.5rem;font-weight:500}
+.result-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+
+/* answer table */
+.ans-table-wrap{background:var(--bg);border:1px solid var(--border);border-radius:var(--rxl);overflow:hidden;box-shadow:0 2px 12px rgba(109,99,200,.06);margin-bottom:1rem}
+.ans-table-head{padding:14px 20px;font-size:11px;font-weight:700;color:var(--acc);border-bottom:1px solid var(--border);letter-spacing:.08em;text-transform:uppercase;background:var(--bg2);display:flex;justify-content:space-between;align-items:center}
+table{width:100%;border-collapse:collapse}
+th{padding:10px 16px;font-size:12px;font-weight:600;color:var(--text2);text-align:left;background:var(--bg2);border-bottom:1px solid var(--border)}
+td{padding:11px 16px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.5}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg2)}
+.td-en{font-weight:600;color:var(--text);white-space:nowrap}
+.td-ko{color:var(--text2)}
+.td-cat{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--acc-l);color:var(--acc);border:1px solid var(--acc-m);font-weight:600;white-space:nowrap}
+.td-result{white-space:nowrap}
+.badge-ok{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--ok-bg);color:var(--ok-t);border:1px solid var(--ok-b);font-weight:600}
+.badge-fail{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--no-bg);color:var(--no-t);border:1px solid var(--no-b);font-weight:600}
+
+@media(max-width:480px){
+  body{padding:1.5rem .75rem}
+  .fc-term,.mcq-term{font-size:22px}
+  .big-score{font-size:48px}
+  .header h1{font-size:21px}
+  td,th{padding:9px 10px;font-size:12px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- SVG illustration -->
+<div class="hero">
+<svg width="220" height="160" viewBox="0 0 220 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- shadows -->
+  <ellipse cx="62" cy="152" rx="36" ry="7" fill="#d8d0f8" opacity=".5"/>
+  <ellipse cx="158" cy="152" rx="36" ry="7" fill="#d8d0f8" opacity=".5"/>
+
+  <!-- ═══ CAT 1: white with black spots ═══ -->
+  <!-- body -->
+  <ellipse cx="62" cy="118" rx="30" ry="28" fill="#f5f5f5"/>
+  <!-- black spot on body -->
+  <ellipse cx="52" cy="112" rx="10" ry="8" fill="#2a2a2a"/>
+  <ellipse cx="72" cy="128" rx="8" ry="6" fill="#2a2a2a"/>
+  <!-- tail -->
+  <path d="M90 130 Q108 118 104 106 Q100 96 92 100" stroke="#f5f5f5" stroke-width="9" stroke-linecap="round" fill="none"/>
+  <!-- head -->
+  <ellipse cx="62" cy="82" rx="26" ry="24" fill="#f5f5f5"/>
+  <!-- black spot on head -->
+  <ellipse cx="54" cy="76" rx="9" ry="8" fill="#2a2a2a"/>
+  <!-- ears -->
+  <polygon points="40,66 34,46 50,60" fill="#f5f5f5"/>
+  <polygon points="84,66 90,46 74,60" fill="#f5f5f5"/>
+  <polygon points="41,64 36,50 49,61" fill="#ffb3c1"/>
+  <polygon points="83,64 88,50 75,61" fill="#ffb3c1"/>
+  <!-- eyes - happy squint -->
+  <path d="M51 82 Q55 77 59 82" stroke="#2a2a2a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <path d="M65 82 Q69 77 73 82" stroke="#2a2a2a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <!-- nose -->
+  <ellipse cx="62" cy="88" rx="3" ry="2" fill="#ffb3c1"/>
+  <!-- mouth -->
+  <path d="M59 90 Q62 93 65 90" stroke="#aaa" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <!-- whiskers left -->
+  <line x1="36" y1="87" x2="56" y2="89" stroke="#ccc" stroke-width="1"/>
+  <line x1="36" y1="91" x2="56" y2="91" stroke="#ccc" stroke-width="1"/>
+  <!-- whiskers right -->
+  <line x1="68" y1="89" x2="88" y2="87" stroke="#ccc" stroke-width="1"/>
+  <line x1="68" y1="91" x2="88" y2="91" stroke="#ccc" stroke-width="1"/>
+  <!-- paws -->
+  <ellipse cx="46" cy="143" rx="10" ry="7" fill="#f5f5f5"/>
+  <ellipse cx="72" cy="145" rx="10" ry="7" fill="#f5f5f5"/>
+  <!-- paw toes -->
+  <ellipse cx="42" cy="141" rx="3" ry="2.5" fill="#e8e8e8"/>
+  <ellipse cx="46" cy="140" rx="3" ry="2.5" fill="#e8e8e8"/>
+  <ellipse cx="50" cy="141" rx="3" ry="2.5" fill="#e8e8e8"/>
+  <ellipse cx="68" cy="143" rx="3" ry="2.5" fill="#e8e8e8"/>
+  <ellipse cx="72" cy="142" rx="3" ry="2.5" fill="#e8e8e8"/>
+  <ellipse cx="76" cy="143" rx="3" ry="2.5" fill="#e8e8e8"/>
+
+  <!-- ═══ CAT 2: tuxedo ═══ -->
+  <!-- body black -->
+  <ellipse cx="158" cy="118" rx="30" ry="28" fill="#1a1a1a"/>
+  <!-- white chest -->
+  <ellipse cx="158" cy="122" rx="14" ry="18" fill="#f5f5f5"/>
+  <!-- tail -->
+  <path d="M130 130 Q112 118 116 106 Q120 96 128 100" stroke="#1a1a1a" stroke-width="9" stroke-linecap="round" fill="none"/>
+  <!-- head black -->
+  <ellipse cx="158" cy="82" rx="26" ry="24" fill="#1a1a1a"/>
+  <!-- white muzzle -->
+  <ellipse cx="158" cy="90" rx="11" ry="8" fill="#f5f5f5"/>
+  <!-- ears -->
+  <polygon points="136,66 130,46 146,60" fill="#1a1a1a"/>
+  <polygon points="180,66 186,46 170,60" fill="#1a1a1a"/>
+  <polygon points="137,64 132,50 145,61" fill="#ffb3c1"/>
+  <polygon points="179,64 184,50 171,61" fill="#ffb3c1"/>
+  <!-- eyes - happy squint green -->
+  <path d="M147 80 Q151 75 155 80" stroke="#2a2a2a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <path d="M161 80 Q165 75 169 80" stroke="#2a2a2a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <!-- tiny eye shine -->
+  <circle cx="150" cy="78" r="1.2" fill="#6ee7b7" opacity=".8"/>
+  <circle cx="164" cy="78" r="1.2" fill="#6ee7b7" opacity=".8"/>
+  <!-- nose pink -->
+  <ellipse cx="158" cy="88" rx="3" ry="2" fill="#ffb3c1"/>
+  <!-- mouth -->
+  <path d="M155 90 Q158 93 161 90" stroke="#aaa" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <!-- whiskers left -->
+  <line x1="132" y1="87" x2="152" y2="89" stroke="#555" stroke-width="1"/>
+  <line x1="132" y1="91" x2="152" y2="91" stroke="#555" stroke-width="1"/>
+  <!-- whiskers right -->
+  <line x1="164" y1="89" x2="184" y2="87" stroke="#555" stroke-width="1"/>
+  <line x1="164" y1="91" x2="184" y2="91" stroke="#555" stroke-width="1"/>
+  <!-- white bow tie -->
+  <path d="M150 108 L158 113 L150 118 Z" fill="#f5f5f5"/>
+  <path d="M166 108 L158 113 L166 118 Z" fill="#f5f5f5"/>
+  <circle cx="158" cy="113" r="3" fill="#f5f5f5"/>
+  <!-- paws -->
+  <ellipse cx="144" cy="143" rx="10" ry="7" fill="#1a1a1a"/>
+  <ellipse cx="170" cy="145" rx="10" ry="7" fill="#f5f5f5"/>
+  <!-- paw toes -->
+  <ellipse cx="140" cy="141" rx="3" ry="2.5" fill="#333"/>
+  <ellipse cx="144" cy="140" rx="3" ry="2.5" fill="#333"/>
+  <ellipse cx="148" cy="141" rx="3" ry="2.5" fill="#333"/>
+  <ellipse cx="166" cy="143" rx="3" ry="2.5" fill="#e8e8e8"/>
+  <ellipse cx="170" cy="142" rx="3" ry="2.5" fill="#e8e8e8"/>
+  <ellipse cx="174" cy="143" rx="3" ry="2.5" fill="#e8e8e8"/>
+
+  <!-- sparkles -->
+  <text x="6" y="45" font-size="16" fill="#f59e0b">✦</text>
+  <text x="198" y="38" font-size="13" fill="#a855f7">✦</text>
+  <text x="100" y="22" font-size="18" fill="#6d63c8">✦</text>
+  <text x="14" y="135" font-size="10" fill="#ec4899">✦</text>
+  <text x="200" y="130" font-size="11" fill="#f59e0b">✦</text>
+</svg>
+</div>
+
+<div class="header">
+  <div class="badge">✦ AI 퀴즈 메이커</div>
+  <h1>전문용어 퀴즈</h1>
+  <p>주제를 입력하면 AI가 그 분야의 진짜 전문용어만<br>골라서 퀴즈를 만들어줍니다</p>
+</div>
+
+<!-- SETUP -->
+<div id="setup-section">
+  <div class="card">
+    <div class="slabel">Anthropic API 키</div>
+    <div class="row">
+      <input type="password" id="api-key" placeholder="sk-ant-..." autocomplete="off">
+      <button class="small-btn" onclick="toggleKey()">보기</button>
+    </div>
+    <div class="api-actions">
+      <button class="small-btn" onclick="saveKey()">💾 저장</button>
+      <span class="saved-badge" id="saved-badge">✓ 저장됨</span>
+    </div>
+    <p class="hint">키는 이 브라우저의 localStorage에만 저장됩니다</p>
+  </div>
+
+  <div class="card">
+    <div class="slabel">퀴즈 주제</div>
+    <div class="row">
+      <input type="text" id="topic-input" placeholder="예: derivatives trading, Basel III, insurance underwriting" onkeydown="if(event.key==='Enter')startQuiz()">
+      <button class="small-btn" onclick="startQuiz()">시작 →</button>
+    </div>
+    <div class="hint">금융·경제·IT 어떤 분야든 영어나 한국어로 자유롭게 입력하세요</div>
+    <div class="chips">
+      <span class="chip" onclick="setTopic('derivatives & structured products')">파생상품</span>
+      <span class="chip" onclick="setTopic('banking regulation & Basel III')">은행 규제</span>
+      <span class="chip" onclick="setTopic('insurance & underwriting')">보험</span>
+      <span class="chip" onclick="setTopic('alternative investments & private equity')">대체투자</span>
+      <span class="chip" onclick="setTopic('cybersecurity in finance')">사이버보안</span>
+      <span class="chip" onclick="setTopic('fintech & digital payments infrastructure')">핀테크</span>
+      <span class="chip" onclick="setTopic('capital markets & securities')">자본시장</span>
+      <span class="chip" onclick="setTopic('corporate finance & M&A')">기업금융</span>
+    </div>
+  </div>
+
+  <button class="primary-btn" id="start-btn" onclick="startQuiz()">✨ 퀴즈 생성 시작</button>
+  <p class="status" id="status"></p>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz-section">
+  <div class="prog-wrap"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  <div class="quiz-meta">
+    <span id="q-counter">1 / 20</span>
+    <span class="mode-pill" id="mode-pill">플래시카드</span>
+    <span id="score-disp">점수: 0</span>
+  </div>
+  <div id="q-area"></div>
+  <div id="fc-row" class="fc-btns" style="display:none">
+    <button class="fc-btn" id="btn-no" onclick="fcAns(false)">몰랐어요 ✗</button>
+    <button class="fc-btn knew" id="btn-yes" onclick="fcAns(true)">알고 있었어요 ✓</button>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="result-section">
+  <div class="result-hero">
+    <div class="big-score" id="final-score"></div>
+    <div class="result-sub" id="final-sub"></div>
+    <div class="result-actions">
+      <button class="sec-btn" onclick="newRound()">같은 주제로 새 단어 뽑기</button>
+      <button class="sec-btn" onclick="resetAll()">새 주제로 시작</button>
+    </div>
+  </div>
+
+  <div class="ans-table-wrap">
+    <div class="ans-table-head">
+      <span>정답표</span>
+      <span id="table-topic" style="font-size:12px;color:var(--text2);font-weight:400;text-transform:none;letter-spacing:0"></span>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>영어</th>
+            <th>한국어 뜻</th>
+            <th>분야</th>
+            <th>결과</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="ans-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+const AKEY='vq_api';
+const QUIZ_N=20;
+let terms=[],questions=[],currentIdx=0,score=0,flipped=false,answered=false,results=[],currentTopic='';
+
+// init
+window.addEventListener('load',()=>{
+  const k=localStorage.getItem(AKEY);
+  if(k){document.getElementById('api-key').value=k;document.getElementById('saved-badge').classList.add('on');}
+});
+
+function toggleKey(){const i=document.getElementById('api-key');i.type=i.type==='password'?'text':'password';}
+function saveKey(){
+  const k=document.getElementById('api-key').value.trim();
+  if(!k){setStatus('API 키를 입력해주세요.');return;}
+  localStorage.setItem(AKEY,k);
+  document.getElementById('saved-badge').classList.add('on');
+  setStatus('✓ 저장되었습니다.');setTimeout(()=>setStatus(''),2000);
+}
+function setTopic(t){document.getElementById('topic-input').value=t;}
+function setStatus(m){document.getElementById('status').textContent=m;}
+
+async function startQuiz(){
+  const apiKey=document.getElementById('api-key').value.trim();
+  if(!apiKey){setStatus('API 키를 입력해주세요.');return;}
+  const topic=document.getElementById('topic-input').value.trim();
+  if(!topic){setStatus('퀴즈 주제를 입력해주세요.');return;}
+
+  currentTopic=topic;
+  document.getElementById('start-btn').disabled=true;
+  setStatus('✨ AI가 전문용어를 생성 중입니다...');
+
+  const prompt=`You are a specialist financial vocabulary trainer. Generate ${QUIZ_N} genuinely advanced professional terms related to the topic: "${topic}".
+
+STRICT INCLUSION CRITERIA:
+- Terms must require domain-specific knowledge to understand — a typical American high school student with no finance background should NOT know them
+- Terms related to mechanics, roles, instruments, regulations, or processes within the field
+- Good examples of the difficulty level: collateral, rehypothecation, mark-to-market, convexity, tranching, encumbrance, novation, haircut (finance), waterfalls (PE), ISDA master agreement, Tier 1 capital, duration gap
+
+STRICT EXCLUSION CRITERIA:
+- Terms whose meaning is obvious from the component words alone (e.g. "digital asset", "consumer protection", "online payment", "financial inclusion")
+- Basic macroeconomic concepts regularly covered in news (e.g. monetary policy, fiscal policy, inflation, GDP, interest rate, trade deficit)
+- High school economics vocabulary (e.g. supply and demand, savings, investment, tax, budget)
+- General business words (e.g. strategy, partnership, innovation, platform, ecosystem)
+- Proper nouns (company names, person names, product names, law names)
+- Terms that are just English transliterations obvious in Korean (e.g. "blockchain" → 블록체인 is self-evident)
+
+SELF-CHECK before adding each term: "Would a smart American 17-year-old who has never studied finance or this field be able to guess the meaning from the words alone or from general news exposure?" If YES → exclude.
+
+Provide each term with a detailed Korean explanation (2-4 sentences) that includes: what it is, how it works in practice, and why it matters in the field.
+
+Respond ONLY with a valid JSON array, no markdown, no explanation:
+[{"en":"term","kr":"한국어 번역 (1-4단어, 예: 담보, 재담보, 시가평가)","ko":"상세한 한국어 설명 (2-4문장, 실제 작동 방식과 해당 분야에서의 중요성 포함)","category":"분야명(한국어)"}]`;
+
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':apiKey,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:4000,messages:[{role:'user',content:prompt}]})
+    });
+    if(!resp.ok){const e=await resp.json();throw new Error(e.error?.message||'API 오류');}
+    const data=await resp.json();
+    let raw=data.content.map(i=>i.text||'').join('').replace(/```json|```/g,'').trim();
+    const a=raw.indexOf('[');if(a!==-1)raw=raw.slice(a);
+    let parsed;
+    try{parsed=JSON.parse(raw);}
+    catch(e){
+      const lc=raw.lastIndexOf('}');
+      if(lc!==-1){try{parsed=JSON.parse(raw.slice(0,lc+1)+']');}catch(e2){throw new Error('파싱 실패. 다시 시도해주세요.');}}
+      else throw new Error('파싱 실패. 다시 시도해주세요.');
+    }
+    terms=parsed;
+    if(!Array.isArray(terms)||terms.length===0)throw new Error('용어 생성 실패.');
+    setStatus('');
+    buildQuiz();
+  }catch(e){
+    setStatus('오류: '+e.message);
+    document.getElementById('start-btn').disabled=false;
+  }
+}
+
+function buildQuiz(){
+  results=[];questions=[];score=0;currentIdx=0;
+  const picked=[...terms].sort(()=>Math.random()-.5).slice(0,Math.min(QUIZ_N,terms.length));
+  picked.forEach((term,i)=>{
+    if(i%2===0){
+      questions.push({type:'flashcard',term});
+    }else{
+      const wrongs=terms.filter(t=>t.en!==term.en).sort(()=>Math.random()-.5).slice(0,3);
+      // options store both kr (display) and ko (full def), keyed by kr for matching
+      const wrongOpts=wrongs.map(t=>({kr:t.kr||t.en,ko:t.ko}));
+      const correctOpt={kr:term.kr||term.en,ko:term.ko};
+      const opts=[...wrongOpts,correctOpt].sort(()=>Math.random()-.5);
+      questions.push({type:'mcq',term,options:opts,correct:correctOpt.kr});
+    }
+  });
+  document.getElementById('setup-section').style.display='none';
+  document.getElementById('quiz-section').style.display='block';
+  document.getElementById('result-section').style.display='none';
+  render();
+}
+
+function speak(w){
+  if(!window.speechSynthesis)return;
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(w);
+  u.lang='en-US';u.rate=0.85;
+  window.speechSynthesis.speak(u);
+}
+
+function speakSafe(w){speak(w.replace(/'/g,"\\'")); }
+
+function render(){
+  const q=questions[currentIdx];
+  flipped=false;answered=false;
+  const tot=questions.length;
+  document.getElementById('prog-fill').style.width=((currentIdx/tot)*100)+'%';
+  document.getElementById('q-counter').textContent=(currentIdx+1)+' / '+tot;
+  document.getElementById('score-disp').textContent='점수: '+score;
+  document.getElementById('mode-pill').textContent=q.type==='flashcard'?'플래시카드':'4지선다';
+
+  const area=document.getElementById('q-area');
+  const fcRow=document.getElementById('fc-row');
+
+  if(q.type==='flashcard'){
+    fcRow.style.display='none';
+    const eSafe=q.term.en.replace(/'/g,"\\'");
+    area.innerHTML=`
+      <div class="flashcard" id="fc" onclick="flip()">
+        <div class="fc-label">영어 → 한국어</div>
+        <div class="term-row">
+          <div class="fc-term">${q.term.en}</div>
+          <button class="speak-btn" onclick="event.stopPropagation();speak('${eSafe}')" title="발음 듣기">🔊</button>
+        </div>
+        <div class="fc-cat">${q.term.category}</div>
+        <div class="fc-hint" id="fc-hint">탭해서 뜻 확인 👆</div>
+        <div id="fc-def" style="display:none">
+          <div style="font-size:20px;font-weight:700;color:var(--acc);margin-bottom:10px">${q.term.kr||''}</div>
+          <div class="fc-def">${q.term.ko}</div>
+        </div>
+      </div>`;
+    document.getElementById('btn-yes').disabled=true;
+    document.getElementById('btn-no').disabled=true;
+    fcRow.style.display='flex';
+  }else{
+    fcRow.style.display='none';
+    const eSafe=q.term.en.replace(/'/g,"\\'");
+    area.innerHTML=`
+      <div class="mcq-prompt">
+        <div class="q-label">한국어 번역은?</div>
+        <div class="term-row" style="justify-content:flex-start;margin-top:8px">
+          <div class="mcq-term">${q.term.en}</div>
+          <button class="speak-btn" onclick="speak('${eSafe}')" title="발음 듣기">🔊</button>
+        </div>
+        <div class="mcq-cat">${q.term.category}</div>
+      </div>
+      <div class="mcq-opts">
+        ${q.options.map((o,i)=>`<button class="mcq-opt" onclick="mcqAns(${i})" data-i="${i}">${o.kr}</button>`).join('')}
+      </div>
+      <div id="mcq-detail" style="display:none;background:var(--acc-l);border:1px solid var(--acc-m);border-radius:var(--r);padding:14px 16px;font-size:14px;color:var(--text);line-height:1.7;margin-top:4px"></div>`;
+  }
+}
+
+function flip(){
+  if(flipped)return;flipped=true;
+  document.getElementById('fc').classList.add('flipped');
+  document.getElementById('fc-hint').style.display='none';
+  document.getElementById('fc-def').style.display='block';
+  document.getElementById('btn-yes').disabled=false;
+  document.getElementById('btn-no').disabled=false;
+}
+
+function fcAns(knew){
+  if(answered)return;answered=true;
+  if(knew)score++;
+  results.push({term:questions[currentIdx].term,correct:knew});
+  document.getElementById('btn-yes').disabled=true;
+  document.getElementById('btn-no').disabled=true;
+  setTimeout(next,500);
+}
+
+function mcqAns(idx){
+  if(answered)return;answered=true;
+  const q=questions[currentIdx];
+  const ok=q.options[idx].kr===q.correct;
+  if(ok)score++;
+  results.push({term:q.term,correct:ok});
+  document.querySelectorAll('.mcq-opt').forEach(b=>{
+    b.disabled=true;
+    const bo=q.options[parseInt(b.dataset.i)];
+    if(bo.kr===q.correct)b.classList.add('correct');
+    else if(parseInt(b.dataset.i)===idx&&!ok)b.classList.add('wrong');
+  });
+  // show detailed meaning
+  const detail=document.getElementById('mcq-detail');
+  if(detail){
+    detail.style.display='block';
+    detail.innerHTML='<strong style="color:var(--acc)">'+(ok?'✓ 정답!':'✗ 오답')+'</strong> <strong>'+q.term.kr+'</strong> — '+q.term.ko;
+  }
+  setTimeout(next,3500);
+}
+
+function next(){
+  currentIdx++;
+  if(currentIdx>=questions.length)showResult();
+  else render();
+}
+
+function showResult(){
+  document.getElementById('quiz-section').style.display='none';
+  document.getElementById('result-section').style.display='block';
+  const pct=Math.round((score/questions.length)*100);
+  document.getElementById('final-score').textContent=pct+'%';
+  document.getElementById('final-sub').textContent=`${questions.length}문제 중 ${score}개 정답`;
+  document.getElementById('table-topic').textContent='주제: '+currentTopic;
+
+  document.getElementById('ans-tbody').innerHTML=results.map(r=>{
+    const eSafe=r.term.en.replace(/'/g,"\\'");
+    return `<tr>
+      <td class="td-en">${r.term.en}<br><span style="font-size:11px;color:var(--acc);font-weight:600">${r.term.kr||''}</span></td>
+      <td class="td-ko">${r.term.ko}</td>
+      <td><span class="td-cat">${r.term.category}</span></td>
+      <td class="td-result"><span class="${r.correct?'badge-ok':'badge-fail'}">${r.correct?'정답':'오답'}</span></td>
+      <td><button class="speak-btn" style="width:28px;height:28px;font-size:13px" onclick="speak('${eSafe}')" title="발음 듣기">🔊</button></td>
+    </tr>`;
+  }).join('');
+}
+
+async function newRound(){
+  document.getElementById('result-section').style.display='none';
+  document.getElementById('setup-section').style.display='block';
+  document.getElementById('start-btn').disabled=false;
+  document.getElementById('topic-input').value=currentTopic;
+  setStatus('');
+}
+
+function resetAll(){
+  terms=[];questions=[];
+  document.getElementById('setup-section').style.display='block';
+  document.getElementById('quiz-section').style.display='none';
+  document.getElementById('result-section').style.display='none';
+  document.getElementById('start-btn').disabled=false;
+  document.getElementById('topic-input').value='';
+  setStatus('');
+}
+</script>
+</body>
+</html>
